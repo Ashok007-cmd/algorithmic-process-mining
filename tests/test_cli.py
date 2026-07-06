@@ -43,6 +43,27 @@ class TestCmdRun:
         cmd_run(args)
         assert output.exists()
 
+    def test_run_neutralizes_csv_formula_injection(self, tmp_path):
+        import pandas as pd
+
+        raw = tmp_path / "raw.csv"
+        pd.DataFrame(
+            {
+                "case:concept:name": ["=cmd|'/C calc'!A0", "ORD_2"],
+                "concept:name": ['+HYPERLINK("http://evil.example")', "Order Created"],
+                "time:timestamp": ["2024-01-01 08:00:00", "2024-01-01 09:00:00"],
+            }
+        ).to_csv(raw, index=False)
+        output = tmp_path / "clean.csv"
+        args = build_parser().parse_args(["run", "--input", str(raw), "--output", str(output)])
+        cmd_run(args)
+
+        raw_text = output.read_text()
+        # A leading single quote tells Excel/LibreOffice/Sheets to render the
+        # cell as literal text instead of evaluating it as a formula.
+        assert "'=cmd|'/C calc'!A0" in raw_text
+        assert "'+HYPERLINK" in raw_text
+
     def test_run_with_anonymize(self, tmp_path, o2c_df):
         raw = tmp_path / "raw.csv"
         o2c_df.to_csv(raw, index=False)

@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "algorithmic-process-mining"
 version = "1.1.0"
 description = "Algorithmic Process Mining and Conformance Checking for logistics (O2C / P2P cycles)"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
     "pm4py>=2.7.22,<3.0",

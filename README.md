@@ -1,8 +1,24 @@
 # Algorithmic Process Mining
 
-Discover real business process models from ERP-style event logs, check conformance against a normative "should-be" model, and surface bottlenecks, rework, and cycle-time KPIs — as a CLI pipeline or an interactive dashboard.
+[![CI](https://github.com/Ashok007-cmd/algorithmic-process-mining/actions/workflows/ci.yml/badge.svg)](https://github.com/Ashok007-cmd/algorithmic-process-mining/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-125%20passing-brightgreen)](docs/AUDIT_REPORT.md)
+[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen)](docs/AUDIT_REPORT.md)
+[![Security Audit](https://img.shields.io/badge/security-audited-blue)](docs/AUDIT_REPORT.md)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Built around [`pm4py`](https://github.com/process-intelligence-solutions/pm4py) for the Order-to-Cash (O2C) and Procure-to-Pay (P2P) logistics cycles, but works with any event log that has a case ID, an activity name, and a timestamp.
+A production-shaped **process mining and conformance checking pipeline** for logistics event logs (Order-to-Cash / Procure-to-Pay). It answers the two questions every business process analyst is actually asked: *"what is our process really doing?"* and *"how far is that from what it's supposed to do?"* — algorithmically, from event data, not from a whiteboard.
+
+Given a raw event log (case ID + activity + timestamp — the same shape SAP/Oracle ERP audit trails export), it discovers the actual process model, measures conformance against a documented SOP, and quantifies bottlenecks, rework loops, and cycle time — as a scriptable CLI pipeline or an interactive dashboard.
+
+## Why this exists
+
+Manually-mapped process diagrams describe what someone *believes* the process is. Process mining discovers what it *actually is*, from the system-of-record's own event trail — including the shadow processes, skipped approvals, and rework loops that never make it onto a whiteboard. This project implements that discipline end-to-end:
+
+- **Discovery** — Inductive Miner (`pm4py`) reconstructs a sound Petri net from raw events, with `im`/`imf`/`imd` variants trading off precision vs. speed on larger logs.
+- **Conformance checking** — every case is measured against a normative "to-be" SOP model via both token-based replay (fast, diagnostic) and alignments (precise, cost-based), so you get a real fitness score instead of a subjective compliance guess.
+- **Root-cause analytics** — bottleneck detection (which activity is actually slow, and by how much), rework detection (which steps get repeated), and variant analysis (how many distinct paths through the process actually exist, and what share follows the happy path).
+- **Object-centric support (OCEL 2.0)** — for processes where a single case ID isn't enough (e.g., one order touching multiple deliveries and invoices).
 
 ## What it does
 
@@ -11,6 +27,17 @@ Built around [`pm4py`](https://github.com/process-intelligence-solutions/pm4py) 
 3. **Check conformance** — either self-conformance (as-discovered) or against a normative SOP model (as-is vs to-be), via both token-based replay and alignments.
 4. **Analyze** cycle time, throughput bottlenecks, rework loops, and trace variants.
 5. **Visualize** everything in a Streamlit dashboard, or drive it all from the CLI for batch/automated use.
+
+```mermaid
+flowchart LR
+    A[Raw event log\nCSV / XES / OCEL] --> B[Ingest\nvalidate + transform]
+    B --> C[Discover\nInductive Miner]
+    C --> D[Conformance\ntoken replay + alignments]
+    D --> E[Analyze\nKPIs, bottlenecks, variants]
+    N[Normative SOP\nPNML] -.as-is vs to-be.-> D
+    E --> F[Dashboard / CLI output]
+    C --> F
+```
 
 ## Quickstart
 
@@ -91,12 +118,15 @@ src/
 │   ├── dashboard.py            # Streamlit app
 │   ├── charts.py               # Plotly chart components
 │   └── petri_render.py         # Petri net / DFG / heuristics net rendering (graceful Graphviz fallback)
-└── utils/                   # logging, file-path validation, discovery-result caching
+└── utils/                   # logging, file-path validation, discovery-result caching, CSV-injection sanitization
 
 data/
 ├── normative/    # SOP ("to-be") Petri nets — o2c_sop.pnml, p2p_sop.pnml
 ├── sample/       # small example logs
 ├── raw/ processed/ models/ results/ ocel/   # pipeline working directories (gitignored)
+
+docs/
+└── AUDIT_REPORT.md   # improvement analysis + full security/vulnerability audit (see below)
 
 tests/            # pytest suite mirroring src/, plus integration + CLI e2e tests
 ```
@@ -113,7 +143,11 @@ make typecheck        # mypy --strict
 make run-app          # streamlit dashboard
 ```
 
-The test suite covers ingestion, discovery, conformance, analysis, caching, CLI commands, and OCEL loading (112 tests, ~90% coverage on `src/`). CI (`.github/workflows/ci.yml`) runs ruff, ruff format check, mypy, bandit, pip-audit, and the full pytest matrix (3.11/3.12) on every push/PR.
+The test suite covers ingestion, discovery, conformance, analysis, caching, CLI commands, and OCEL loading (**125 tests, 89% coverage** on `src/`). CI (`.github/workflows/ci.yml`) runs ruff, ruff format check, mypy --strict, bandit, pip-audit, and the full pytest matrix (3.11/3.12) on every push/PR.
+
+## Security
+
+This project has been through a full audit: static analysis (bandit, mypy --strict), dependency vulnerability scanning (pip-audit, with 2 real CVEs found and patched), supply-chain legitimacy verification of all 101 packages in the dependency tree, a first-party code-integrity review, and authorized adversarial testing of the CLI (including a confirmed-and-fixed CSV formula injection vulnerability). Full methodology and findings: **[docs/AUDIT_REPORT.md](docs/AUDIT_REPORT.md)**.
 
 ## Docker
 
@@ -126,6 +160,6 @@ Runs as a non-root user with a container healthcheck against Streamlit's `/_stco
 
 ## Notes
 
-- `pm4py` is licensed AGPL v3 (Community Edition) — commercial use without a commercial pm4py license requires open-sourcing applications built on it. See the [pm4py licensing page](https://processintelligence.solutions/pm4py#licensing).
+- `pm4py` is licensed AGPL v3 (Community Edition) — commercial use without a commercial pm4py license requires open-sourcing applications built on it. This project's own code is MIT-licensed (see [LICENSE](LICENSE)); see the [pm4py licensing page](https://processintelligence.solutions/pm4py#licensing) for pm4py's own terms.
 - Petri net / DFG rendering requires the system `graphviz` package (the `dot` binary); if it isn't installed, rendering raises a clear `VisualizationUnavailableError` instead of crashing, and the dashboard shows an informational message.
 - The normative SOP models in `data/normative/` were discovered from each process's clean happy-path sequence (see `src/data/generators/synthetic.py`) — replace them with your own PNML files to check conformance against a real organizational SOP.

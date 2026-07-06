@@ -138,6 +138,8 @@ def generate_event_log(
     seed: int = 42,
     start_date: datetime | None = None,
 ) -> pd.DataFrame:
+    if n_cases < 1:
+        raise ValueError(f"n_cases must be >= 1, got {n_cases}")
     rng = random.Random(seed)  # nosec B311
     if start_date is None:
         start_date = datetime(2024, 1, 1, 8, 0, 0)

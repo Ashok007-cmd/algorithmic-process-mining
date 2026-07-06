@@ -74,3 +74,11 @@ class TestGenerators:
         for case_id, group in df.groupby("case:concept:name"):
             times = pd.to_datetime(group["time:timestamp"])
             assert times.is_monotonic_increasing
+
+    def test_rejects_zero_cases(self):
+        with pytest.raises(ValueError, match="n_cases must be >= 1"):
+            generate_o2c_log(n_cases=0)
+
+    def test_rejects_negative_cases(self):
+        with pytest.raises(ValueError, match="n_cases must be >= 1"):
+            generate_p2p_log(n_cases=-5)

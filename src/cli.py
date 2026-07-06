@@ -14,6 +14,7 @@ from src.conformance.comparison import compare_methods, compare_to_normative
 from src.data.generators.synthetic import generate_o2c_log, generate_p2p_log
 from src.data.pipeline import run_pipeline
 from src.discovery.inductive import discover_inductive
+from src.utils.io_utils import sanitize_for_csv_injection
 from src.utils.log_utils import get_logger, setup_logging
 
 logger = get_logger(__name__)
@@ -68,7 +69,7 @@ def _write_event_log(df: pd.DataFrame, output_path: Path) -> Path:
         df.to_parquet(output_path, index=False)
         return output_path
     actual_path = output_path if output_path.suffix == ".csv" else output_path.with_suffix(".csv")
-    df.to_csv(actual_path, index=False)
+    sanitize_for_csv_injection(df).to_csv(actual_path, index=False)
     return actual_path
 
 
