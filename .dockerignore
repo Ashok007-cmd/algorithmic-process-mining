@@ -1,0 +1,16 @@
+__pycache__/
+.venv/
+.planning/
+.env
+.git/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+data/
+logs/
+notebooks/
+tests/
+*.md
+!README.md

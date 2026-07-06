@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="imdf_net_1783358336.576781" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <name>
+      <text>imdf_net_1783358336.576781</text>
+    </name>
+    <page id="n0">
+      <place id="source">
+        <name>
+          <text>source</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <place id="p_5">
+        <name>
+          <text>p_5</text>
+        </name>
+      </place>
+      <place id="p_7">
+        <name>
+          <text>p_7</text>
+        </name>
+      </place>
+      <place id="p_8">
+        <name>
+          <text>p_8</text>
+        </name>
+      </place>
+      <place id="p_4">
+        <name>
+          <text>p_4</text>
+        </name>
+      </place>
+      <place id="p_3">
+        <name>
+          <text>p_3</text>
+        </name>
+      </place>
+      <place id="p_6">
+        <name>
+          <text>p_6</text>
+        </name>
+      </place>
+      <transition id="a953a3dd-84b4-4aa7-81c2-8976244e6c18">
+        <name>
+          <text>PO Created</text>
+        </name>
+      </transition>
+      <transition id="ddd5c3a0-db06-4be5-bd12-4e467455a643">
+        <name>
+          <text>Goods Received</text>
+        </name>
+      </transition>
+      <transition id="425d7a17-9518-446f-bc46-fb3630ba7ecb">
+        <name>
+          <text>PO Closed</text>
+        </name>
+      </transition>
+      <transition id="575c1249-2460-41d3-a0af-53f36f30715d">
+        <name>
+          <text>Invoice Verified</text>
+        </name>
+      </transition>
+      <transition id="45cdc13e-136a-47a9-9ef3-348e221ff25c">
+        <name>
+          <text>Invoice Received</text>
+        </name>
+      </transition>
+      <transition id="8ec2c5d5-9d4a-45cb-ba6c-4108d35b7c0e">
+        <name>
+          <text>PO Approved</text>
+        </name>
+      </transition>
+      <transition id="641be692-89da-48dc-890a-9478c95dc570">
+        <name>
+          <text>Payment Processed</text>
+        </name>
+      </transition>
+      <arc id="136758298044576" source="p_3" target="8ec2c5d5-9d4a-45cb-ba6c-4108d35b7c0e"/>
+      <arc id="136758298044672" source="8ec2c5d5-9d4a-45cb-ba6c-4108d35b7c0e" target="p_4"/>
+      <arc id="136758298045248" source="p_5" target="45cdc13e-136a-47a9-9ef3-348e221ff25c"/>
+      <arc id="136758298045344" source="45cdc13e-136a-47a9-9ef3-348e221ff25c" target="p_6"/>
+      <arc id="136758298045632" source="p_6" target="575c1249-2460-41d3-a0af-53f36f30715d"/>
+      <arc id="136758298045728" source="575c1249-2460-41d3-a0af-53f36f30715d" target="p_7"/>
+      <arc id="136758298046016" source="p_7" target="641be692-89da-48dc-890a-9478c95dc570"/>
+      <arc id="136758298046112" source="641be692-89da-48dc-890a-9478c95dc570" target="p_8"/>
+      <arc id="136758298044240" source="source" target="a953a3dd-84b4-4aa7-81c2-8976244e6c18"/>
+      <arc id="136758298044912" source="p_4" target="ddd5c3a0-db06-4be5-bd12-4e467455a643"/>
+      <arc id="136758298044336" source="a953a3dd-84b4-4aa7-81c2-8976244e6c18" target="p_3"/>
+      <arc id="136758298045008" source="ddd5c3a0-db06-4be5-bd12-4e467455a643" target="p_5"/>
+      <arc id="136758298046256" source="p_8" target="425d7a17-9518-446f-bc46-fb3630ba7ecb"/>
+      <arc id="136758298046352" source="425d7a17-9518-446f-bc46-fb3630ba7ecb" target="sink"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

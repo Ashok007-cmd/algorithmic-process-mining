@@ -1,0 +1,30 @@
+data:
+  raw_path: data/raw
+  processed_path: data/processed
+  source: synthetic
+  column_mapping:
+    case_id: "case:concept:name"
+    activity: "concept:name"
+    timestamp: "time:timestamp"
+
+discovery:
+  algorithm: inductive  # inductive | heuristics
+  variant: IMd         # IM | IMf | IMd
+  noise_threshold: 0.2
+
+conformance:
+  method: token_based  # token_based | alignment
+  model_path: data/normative/o2c_sop.pnml
+
+analysis:
+  top_variants: 10
+  bottleneck_percentile: 90
+
+visualization:
+  dashboard_port: 8501
+  petri_format: svg   # svg | png
+  max_dfg_nodes: 50
+
+logging:
+  level: INFO
+  file: logs/pipeline.log

@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+*.egg
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# Data (generated or download-only)
+data/raw/
+data/processed/
+data/models/
+data/results/
+data/ocel/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# pm4py cache
+.pm4py_cache/
+
+# Build artifacts
+*.png
+*.svg
+*.pdf
+!docs/*.md
+
+# Logs
+logs/
+
+# Ruff
+.ruff_cache/
+
+# Mypy
+.mypy_cache/
+
+# Pytest
+.pytest_cache/
+
+# Claude Code local session state
+.claude/
+
+# AI-assisted planning/scratch docs (not authoritative project docs)
+.planning/

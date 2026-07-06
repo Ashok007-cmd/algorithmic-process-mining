@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="imdf_net_1783358336.542976" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <name>
+      <text>imdf_net_1783358336.542976</text>
+    </name>
+    <page id="n0">
+      <place id="source">
+        <name>
+          <text>source</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="p_5">
+        <name>
+          <text>p_5</text>
+        </name>
+      </place>
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <place id="p_7">
+        <name>
+          <text>p_7</text>
+        </name>
+      </place>
+      <place id="p_9">
+        <name>
+          <text>p_9</text>
+        </name>
+      </place>
+      <place id="p_4">
+        <name>
+          <text>p_4</text>
+        </name>
+      </place>
+      <place id="p_3">
+        <name>
+          <text>p_3</text>
+        </name>
+      </place>
+      <place id="p_6">
+        <name>
+          <text>p_6</text>
+        </name>
+      </place>
+      <place id="p_8">
+        <name>
+          <text>p_8</text>
+        </name>
+      </place>
+      <transition id="4ec63a3b-0bc7-444b-88de-53402cf127bc">
+        <name>
+          <text>Order Created</text>
+        </name>
+      </transition>
+      <transition id="80d941f8-5a49-4a94-9f56-c7ddfee30c32">
+        <name>
+          <text>Shipped</text>
+        </name>
+      </transition>
+      <transition id="17419d41-0434-4aa1-b753-6c9b32c1fb6a">
+        <name>
+          <text>Picked</text>
+        </name>
+      </transition>
+      <transition id="44cec705-9474-46f9-aa0a-5e6ece296750">
+        <name>
+          <text>Invoice Sent</text>
+        </name>
+      </transition>
+      <transition id="d8a5289f-1a03-4273-9b59-9cb7ad4afcff">
+        <name>
+          <text>Invoice Cleared</text>
+        </name>
+      </transition>
+      <transition id="0f66414b-2bef-4c01-b348-457628d5dee9">
+        <name>
+          <text>Packed</text>
+        </name>
+      </transition>
+      <transition id="f4ea92bb-e229-4d7c-931e-1ba35161c1e0">
+        <name>
+          <text>Order Confirmed</text>
+        </name>
+      </transition>
+      <transition id="676b56dd-dc41-4393-abdf-a0bc2ac699ed">
+        <name>
+          <text>Payment Received</text>
+        </name>
+      </transition>
+      <arc id="136758298036608" source="4ec63a3b-0bc7-444b-88de-53402cf127bc" target="p_3"/>
+      <arc id="136758298036896" source="p_3" target="f4ea92bb-e229-4d7c-931e-1ba35161c1e0"/>
+      <arc id="136758298037088" source="17419d41-0434-4aa1-b753-6c9b32c1fb6a" target="p_5"/>
+      <arc id="136758298037376" source="p_5" target="0f66414b-2bef-4c01-b348-457628d5dee9"/>
+      <arc id="136758297645408" source="p_7" target="44cec705-9474-46f9-aa0a-5e6ece296750"/>
+      <arc id="136758297738944" source="676b56dd-dc41-4393-abdf-a0bc2ac699ed" target="p_9"/>
+      <arc id="136758297738656" source="d8a5289f-1a03-4273-9b59-9cb7ad4afcff" target="sink"/>
+      <arc id="136758298036656" source="source" target="4ec63a3b-0bc7-444b-88de-53402cf127bc"/>
+      <arc id="136758298037136" source="p_4" target="17419d41-0434-4aa1-b753-6c9b32c1fb6a"/>
+      <arc id="136758298036848" source="f4ea92bb-e229-4d7c-931e-1ba35161c1e0" target="p_4"/>
+      <arc id="136758298037328" source="0f66414b-2bef-4c01-b348-457628d5dee9" target="p_6"/>
+      <arc id="136758300128944" source="p_6" target="80d941f8-5a49-4a94-9f56-c7ddfee30c32"/>
+      <arc id="136758299802992" source="80d941f8-5a49-4a94-9f56-c7ddfee30c32" target="p_7"/>
+      <arc id="136758297656496" source="44cec705-9474-46f9-aa0a-5e6ece296750" target="p_8"/>
+      <arc id="136758299280784" source="p_8" target="676b56dd-dc41-4393-abdf-a0bc2ac699ed"/>
+      <arc id="136758297739088" source="p_9" target="d8a5289f-1a03-4273-9b59-9cb7ad4afcff"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>
