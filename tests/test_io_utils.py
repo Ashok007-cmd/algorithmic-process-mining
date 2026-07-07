@@ -26,6 +26,26 @@ class TestValidateInputPath:
         with pytest.raises(ValueError, match="File too large"):
             validate_input_path(path, max_size_bytes=10)
 
+    def test_allowed_root_permits_path_inside(self, tmp_path):
+        root = tmp_path / "data"
+        root.mkdir()
+        path = root / "file.csv"
+        path.write_text("data")
+        assert validate_input_path(path, allowed_root=root) == path.resolve()
+
+    def test_allowed_root_rejects_path_outside(self, tmp_path):
+        root = tmp_path / "data"
+        root.mkdir()
+        outside = tmp_path / "outside.csv"
+        outside.write_text("data")
+        with pytest.raises(ValueError, match="outside allowed data root"):
+            validate_input_path(outside, allowed_root=root)
+
+    def test_no_allowed_root_permits_any_path(self, tmp_path):
+        path = tmp_path / "file.csv"
+        path.write_text("data")
+        assert validate_input_path(path) == path.resolve()
+
 
 class TestSanitizeForCsvInjection:
     @pytest.mark.parametrize(

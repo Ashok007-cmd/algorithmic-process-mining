@@ -1,8 +1,8 @@
 # Algorithmic Process Mining
 
 [![CI](https://github.com/Ashok007-cmd/algorithmic-process-mining/actions/workflows/ci.yml/badge.svg)](https://github.com/Ashok007-cmd/algorithmic-process-mining/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-125%20passing-brightgreen)](docs/AUDIT_REPORT.md)
-[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen)](docs/AUDIT_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-142%20passing-brightgreen)](docs/AUDIT_REPORT.md)
+[![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)](docs/AUDIT_REPORT.md)
 [![Security Audit](https://img.shields.io/badge/security-audited-blue)](docs/AUDIT_REPORT.md)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -70,15 +70,16 @@ streamlit run src/viz/dashboard.py
 | Command | Purpose |
 |---|---|
 | `generate --process {o2c,p2p} --cases N [--noise F] [--seed N] --output PATH` | Generate a synthetic O2C/P2P event log with controllable noise (skips, rework, insertions) |
-| `run --input PATH --output PATH [--anonymize] [--salt S] [--config PATH]` | Load, validate, transform, and (optionally) anonymize an event log |
-| `discover --input PATH --output PATH [--variant {im,imf,imd}] [--noise-threshold F]` | Discover a Petri net (PNML) with the Inductive Miner |
-| `conformance --input PATH --output PATH [--model PATH]` | Compare a log against a normative model (default `data/normative/o2c_sop.pnml`) via token replay + alignments; falls back to self-discovery if no model is given |
+| `run --input PATH --output PATH [--anonymize] [--salt S] [--config PATH] [--cache]` | Load, validate, transform, and (optionally) anonymize an event log |
+| `discover --input PATH --output PATH [--variant {im,imf,imd}] [--noise-threshold F] [--cache]` | Discover a Petri net (PNML) with the Inductive Miner |
+| `conformance --input PATH --output PATH [--model PATH] [--cache]` | Compare a log against a normative model (default `data/normative/o2c_sop.pnml`) via token replay + alignments; falls back to self-discovery if no model is given |
+| `ocel-summary --input PATH --output PATH` | Summarize an object-centric (OCEL 2.0) event log: object/event counts by type and activity |
 
-All commands accept `--config PATH` to override `config.yaml`. Run `python -m src.cli <command> --help` for full option lists.
+All commands accept `--config PATH` to override `config.yaml`. `--cache` persists the transformed log to `config.data.processed_path` as Parquet, keyed by source file size/mtime and pipeline params, so repeated `discover`/`conformance` runs against the same source file skip re-ingestion and re-transformation. Run `python -m src.cli <command> --help` for full option lists.
 
 ## Configuration
 
-Runtime defaults live in [`config.yaml`](config.yaml): data paths and column mapping, discovery algorithm/variant/noise threshold, conformance model path, analysis thresholds (bottleneck percentile, top-N variants), and visualization limits. `src/config.py` loads it into typed dataclasses; CLI commands and the dashboard both read from it, and any command's `--config` flag can point at an alternate file.
+Runtime defaults live in [`config.yaml`](config.yaml): data paths and column mapping, discovery algorithm/variant/noise threshold, conformance model path, analysis thresholds (bottleneck percentile, top-N variants), and visualization limits. `src/config.py` loads it into typed dataclasses; CLI commands and the dashboard both read from it, and any command's `--config` flag can point at an alternate file. `data.allowed_root` (unset by default) optionally confines `--input` to a directory — defense-in-depth relevant only if this CLI is ever driven by paths from an untrusted remote caller (see [Security](#security)).
 
 Environment variables (see `.env.example`):
 
@@ -92,14 +93,14 @@ Environment variables (see `.env.example`):
 
 ```
 src/
-├── cli.py                  # generate / run / discover / conformance subcommands
+├── cli.py                  # generate / run / discover / conformance / ocel-summary subcommands
 ├── config.py                # config.yaml + .env loader
 ├── data/
 │   ├── loader.py             # CSV / XES / Parquet ingestion
 │   ├── validator.py          # schema, timestamp, duplicate checks
 │   ├── transformer.py        # column mapping, dtype casting, UTC normalization
 │   ├── anonymizer.py         # salted case-ID hashing
-│   ├── pipeline.py           # load -> transform -> validate -> (anonymize)
+│   ├── pipeline.py           # load -> transform -> validate -> (anonymize), with opt-in on-disk Parquet caching
 │   ├── generators/synthetic.py  # synthetic O2C/P2P log generator (noise, rework, skips)
 │   └── ocel/                 # object-centric event log (OCEL 2.0) loading
 ├── discovery/
@@ -143,7 +144,7 @@ make typecheck        # mypy --strict
 make run-app          # streamlit dashboard
 ```
 
-The test suite covers ingestion, discovery, conformance, analysis, caching, CLI commands, and OCEL loading (**125 tests, 89% coverage** on `src/`). CI (`.github/workflows/ci.yml`) runs ruff, ruff format check, mypy --strict, bandit, pip-audit, and the full pytest matrix (3.11/3.12) on every push/PR.
+The test suite covers ingestion (CSV/XES/Parquet), discovery, conformance, analysis, on-disk/in-memory caching, CLI commands, OCEL loading, and the Streamlit dashboard via `streamlit.testing.v1.AppTest` (**142 tests, 97% coverage** on `src/`). CI (`.github/workflows/ci.yml`) runs ruff, ruff format check, mypy --strict, bandit, pip-audit, and the full pytest matrix (3.11/3.12) on every push/PR.
 
 ## Security
 

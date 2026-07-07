@@ -156,3 +156,23 @@ All findings above were independently re-verified after remediation:
 ## 6. Conclusion
 
 Before this audit, the project had zero known CVEs in its own CI-reported tooling but two real, unaddressed dependency CVEs (`pip`, `pyarrow`) and one exploitable application-level vulnerability (CSV formula injection) that no prior automated tooling in this project's CI pipeline (bandit, ruff, mypy) is designed to catch, since it's a data-handling logic issue rather than a static-analysis-detectable pattern. Both dependency CVEs and the injection vulnerability are now fixed, tested, and verified. The remaining open items (§2.2) are scaling/architecture work, not defects — the project is in a solid, defensible state for portfolio review.
+
+---
+
+## 7. Follow-up (2026-07-07): Closing the Improvement Gaps
+
+A second pass re-verified this audit's findings still hold (125 tests green, ruff/mypy/bandit/pip-audit all clean) and then closed most of the "Remaining opportunities" from §2.2:
+
+| §2.2 item | Status | What changed |
+|---|---|---|
+| Dashboard test coverage | **Closed** | `tests/test_dashboard.py` — 3 tests using `streamlit.testing.v1.AppTest`, driving the dashboard headlessly (data load, all 4 tabs, process switch). `src/viz/dashboard.py` went from 0% → 93% covered. Also fixed a real forward-compat bug found along the way: all 5 `use_container_width=True` calls were on Streamlit's deprecation path (removed after 2025-12-31, i.e. already past-due) and now use `width="stretch"`. |
+| XES ingestion test coverage | **Closed** | `tests/test_loader.py` — round-trips a generated log through `pm4py.write_xes`/`load_xes`, plus a missing-file and CLI-dispatch case. `src/data/loader.py` went from partially-covered → 100%. |
+| On-disk Parquet caching for `run_pipeline` | **Closed** | `src/data/pipeline.py::run_pipeline` takes an optional `cache_dir`; when set, a cheap (path/size/mtime + pipeline-params) hash keys a Parquet cache entry, avoiding re-ingestion/re-transformation on repeat runs against the same source file — using the `pyarrow` dependency that was pinned for exactly this and previously unused for it. Wired into the CLI as an opt-in `--cache` flag on `run`/`discover`/`conformance` (opt-in, not default-on, to avoid surprising cache staleness for a first-time user). 3 unit tests (miss→hit, invalidation on content change, key differs by `anonymize`) + 2 CLI-level tests. |
+| OCEL CLI wiring | **Closed** | New `ocel-summary --input PATH --output PATH` subcommand: loads an OCEL 2.0 log (`.json`/`.xml`/`.sqlite`) and writes object/event counts by type and activity as JSON. `src/data/ocel/` was previously fully implemented and unit-tested but unreachable from the CLI; object-centric process mining is now an end-to-end feature, not just a library capability. 2 new CLI tests. |
+| Config-driven data-root allowlist | **Closed** | `validate_input_path()` gained an optional `allowed_root` parameter; `config.yaml`'s `data.allowed_root` (unset by default, documented inline) lets an operator confine `--input` to a directory. Enforced at the CLI layer (`_enforce_allowed_root`) across all four input-taking subcommands. Off by default — this remains, correctly, a non-issue for the tool's actual threat model (§4.5) — but is now one config line away from being enforced if this pipeline is ever driven by paths from an untrusted remote caller. 5 new tests (2 unit, 3 CLI-level: reject-outside, permit-inside, unit round-trip). |
+| Chunked/streaming ingestion for very large logs | **Still open** | Not attempted this pass — genuinely larger scope (a `chunksize`-based read path plus corresponding changes through `transformer`/`validator`) than the others; deferred rather than rushed. |
+| Batch/multiprocessing support | **Still open** | Same reasoning — alignment-based conformance is the expensive operation that would benefit most, but parallelizing it safely needs its own design pass, not a bolt-on. |
+
+**Verification after this pass:** 142 tests passing (up from 125), 97% coverage on `src/` (up from 89%), `ruff check`/`ruff format --check`/`mypy --strict`/`bandit -r src/`/`pip-audit --skip-editable` all still clean. Manual end-to-end smoke test covering `generate` → `run --cache` (verified cache miss then hit) → `discover` → `conformance` → `ocel-summary`, plus a live `streamlit run` HTTP 200 check, all passed.
+
+No new vulnerabilities were introduced or found in this pass; the two closed items with security relevance (`allowed_root`, and the caching layer's cache-key derivation, which never trusts file *content* it hasn't already validated) were designed with the existing threat model in §4.5 in mind rather than as an afterthought.

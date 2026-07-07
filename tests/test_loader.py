@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pandas as pd
+import pm4py
 import pytest
 
-from src.data.loader import load_csv, load_event_log, load_parquet
+from src.data.loader import load_csv, load_event_log, load_parquet, load_xes
 
 
 class TestLoader:
@@ -52,3 +54,26 @@ class TestLoader:
         path.write_text("data")
         with pytest.raises(ValueError, match="Unsupported format"):
             load_event_log(path)
+
+    @pytest.fixture
+    def o2c_xes_df(self, o2c_df):
+        df = o2c_df.copy()
+        df["time:timestamp"] = pd.to_datetime(df["time:timestamp"])
+        return df
+
+    def test_load_xes(self, tmp_path, o2c_xes_df):
+        path = tmp_path / "test.xes"
+        pm4py.write_xes(o2c_xes_df, str(path))
+        result = load_xes(path)
+        assert len(result) == len(o2c_xes_df)
+        assert result["case:concept:name"].nunique() == o2c_xes_df["case:concept:name"].nunique()
+
+    def test_load_xes_missing_file(self):
+        with pytest.raises(FileNotFoundError):
+            load_xes(Path("/nonexistent/file.xes"))
+
+    def test_load_event_log_dispatches_xes(self, tmp_path, o2c_xes_df):
+        path = tmp_path / "test.xes"
+        pm4py.write_xes(o2c_xes_df, str(path))
+        result = load_event_log(path)
+        assert len(result) == len(o2c_xes_df)

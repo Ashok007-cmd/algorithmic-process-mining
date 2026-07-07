@@ -73,23 +73,23 @@ def main() -> None:
         st.subheader("Cycle Time Distribution")
         cycle = compute_cycle_time(df)
         fig = charts.plot_cycle_time_distribution(cycle)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
         st.subheader("Activity Frequency")
         fig2 = charts.plot_activity_frequency(df)
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width="stretch")
 
     with tab3:
         st.subheader("Variant Distribution")
         variants = compute_variants(df)
         fig3 = charts.plot_variant_distribution(variants, top_n=config.analysis.top_variants)
-        st.plotly_chart(fig3, use_container_width=True)
-        st.dataframe(variants, use_container_width=True)
+        st.plotly_chart(fig3, width="stretch")
+        st.dataframe(variants, width="stretch")
 
     with tab4:
         st.subheader("Bottleneck Activities")
         bottlenecks = find_bottlenecks(df, threshold_percentile=config.analysis.bottleneck_percentile)
-        st.dataframe(bottlenecks, use_container_width=True)
+        st.dataframe(bottlenecks, width="stretch")
 
     st.sidebar.markdown("---")
     st.sidebar.markdown("**Algorithmic Process Mining**")

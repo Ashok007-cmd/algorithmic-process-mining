@@ -2,6 +2,10 @@ data:
   raw_path: data/raw
   processed_path: data/processed
   source: synthetic
+  # allowed_root: data  # uncomment to confine --input to this directory (defense-
+  # in-depth; only relevant if this CLI is ever driven by paths from an untrusted
+  # remote caller -- see docs/AUDIT_REPORT.md §4.5). Unset by default: a local
+  # CLI has no privilege boundary to enforce against its own invoking user.
   column_mapping:
     case_id: "case:concept:name"
     activity: "concept:name"

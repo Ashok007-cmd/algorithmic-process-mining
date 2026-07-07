@@ -16,6 +16,7 @@ class DataConfig:
     raw_path: str = "data/raw"
     processed_path: str = "data/processed"
     source: str = "synthetic"
+    allowed_root: str | None = None
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "case_id": "case:concept:name",
